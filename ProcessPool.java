@@ -1,24 +1,18 @@
 import java.io.IOException;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PROCESSPOOL METHODS WHICH REQUIRE AN ACCEPTOR OR PROPOSER TO DIE
+public class ProcessPool
 {
-    //public static int numberOfThreads = 9;
     volatile public static int numberOfProposers = 0;
     public static AtomicInteger numberOfAcceptors = new AtomicInteger(0); //this one changes
     public static int NUMBER_OF_ACCEPTORS = 0; //this one does not change
-
     public static AtomicInteger leaderCount = new AtomicInteger(0);
-
     public static final int TIME_OUT_CONSTANT = 5000; //5000ms base timeout for propose
     public static final int DEFAULT_TIME_OUT_CONSTANT_PREPARE_SERVERSOCKET = 10000;
     public static final int DEFAULT_TIME_OUT_CONSTANT_PREPARE_SOCKET = 6000;
 
-    //public static int selection = 0;
-    //public static int round = 1;
-
+    //basic 1 proposer immediate response times
     public void TestCase_1() throws IOException, InterruptedException
     {
         numberOfProposers = 1;
@@ -41,13 +35,13 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
         }
     }
 
+    //basic 2 proposer immediate response times (M1 goes, then M2)
     public void TestCase_2() throws IOException, InterruptedException
     {
         numberOfProposers = 2;
         numberOfAcceptors.set(7);
         NUMBER_OF_ACCEPTORS = 7;
-        int Majority = NUMBER_OF_ACCEPTORS/2 + 1;
-        Thread learner = new learner("learner", "M2 is president with 4 votes");
+        Thread learner = new learner("learner", "M1 is president with 4 votes");
         proposer proposer1 = new proposer("M1");
         proposer proposer2 = new proposer("M2");
         for(int i = 2; i < NUMBER_OF_ACCEPTORS + 2; i++)
@@ -56,20 +50,20 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
             acceptor.start();
         }
         learner.start();
-        proposer2.prepare(0);
         proposer1.prepare(0);
+        proposer2.prepare(0);
         
         if(proposer1.leader == true && proposer1.prepareFlag == true && proposer2.prepareFlag == true)
         {
             proposer1.propose(0);
         }
-        //TimeUnit.SECONDS.sleep(1);
         if(proposer2.leader == true && proposer1.prepareFlag == true && proposer2.prepareFlag == true)
         {
             proposer2.propose(0);
         }
     }
 
+    //basic 3 proposer immediate response times (M1 goes, then M3, lastly M2)
     public void TestCase_3() throws IOException, InterruptedException
     {
         numberOfProposers = 3;
@@ -172,7 +166,7 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
         Random random = new Random();
         int roundCounter = round;
         int randomResponseTime = 0;
-        int localTimeOut = TIME_OUT_CONSTANT +  500; //4500
+        int localTimeOut = TIME_OUT_CONSTANT +  500; //5500
         Thread learner = new learner("learner", "M1 is president with 5 votes");
         proposer proposer1 = new proposer("M1");
         
@@ -181,7 +175,7 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
             acceptor acceptor = new acceptor("M" + Integer.toString(i + 1));
             if(acceptor.get_Name().equalsIgnoreCase("M2"))
             {
-                acceptor.set_ResponseTime(3);//isM2Working);
+                acceptor.set_ResponseTime(3);
                 acceptor.proposeSocketTimeOut = localTimeOut;
                 if(roundCounter < 3)
                 {
@@ -333,7 +327,7 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
     }
 
     //3 proposers, M2, has a chance to fail or not, regardless M3 will always succeed and carry the consensus
-    //DEPRECATED NOT USING
+    //DEPRECATED NOT USING (Was too unstable to use)
     public void Test_Case8(int round) throws IOException
     {
         numberOfProposers = 3;
@@ -399,8 +393,6 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
         Random random = new Random();
         int roundCounter = round;
         int randomResponseTime = 0;
-        //int localPrepareTimeOutServerSocket = DEFAULT_TIME_OUT_CONSTANT_PREPARE_SERVERSOCKET - 6000;
-        //int localPrepareTimeOutSocket = DEFAULT_TIME_OUT_CONSTANT_PREPARE_SOCKET - 2000;
         int localProposeTimeOut = TIME_OUT_CONSTANT;
         Thread learner = new learner("learner", "M2 is president with 4 votes");
         proposer proposer1 = new proposer("M1");
@@ -421,16 +413,12 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
             {
                 acceptor.set_ResponseTime(1);
                 acceptor.proposeSocketTimeOut  = localProposeTimeOut;
-                //acceptor.prepareSocketTimeOutServerSocket = localPrepareTimeOutServerSocket;
-                //acceptor.prepareSocketTimeOutSocket = localPrepareTimeOutSocket;
             }
             else
             {
                 randomResponseTime = random.nextInt(3)+1;
                 acceptor.set_ResponseTime(randomResponseTime);
                 acceptor.proposeSocketTimeOut  = localProposeTimeOut;
-                //acceptor.prepareSocketTimeOutServerSocket = localPrepareTimeOutServerSocket;
-                //acceptor.prepareSocketTimeOutSocket = localPrepareTimeOutSocket;
             }
             acceptor.start();
         }
@@ -447,5 +435,51 @@ public class ProcessPool //NOTE TO SELF, MUST ALWAYS SET PROPOSE TIMEOUTS IN PRO
             proposer2.propose(0);
         }
     }
-    
+
+    //m2 as proposer always at work, reply instantly and will never not reply to prepare() messages.
+    public void Test_Case10(int round) throws IOException
+    {
+        numberOfProposers = 2;
+        numberOfAcceptors.set(7);
+        NUMBER_OF_ACCEPTORS = 7;
+        Driver.threadCount.set(NUMBER_OF_ACCEPTORS);
+        System.out.println("Round: " + round + "\n");
+        System.out.println("Seeing if M2 is at work");
+        Random random = new Random();
+        int randomResponseTime = 0;
+        int localTimeOut = TIME_OUT_CONSTANT + 2500;
+        System.out.println("M2 is working at the cafe");
+        Thread learner = new learner("learner", "M1 is president with 4 votes");
+        proposer proposer1 = new proposer("M1");
+        proposer proposer2 = new proposer("M2", 1);
+        
+        for(int i = 2; i < NUMBER_OF_ACCEPTORS + 2; i++)
+        {
+            acceptor acceptor = new acceptor("M" + Integer.toString(i + 1));
+            if(acceptor.get_Name().equalsIgnoreCase("M3"))
+            {
+                acceptor.set_ResponseTime(2);
+                acceptor.proposeSocketTimeOut  = localTimeOut;
+            }
+            else
+            {
+                randomResponseTime = random.nextInt(3)+1;
+                acceptor.set_ResponseTime(randomResponseTime);
+                acceptor.proposeSocketTimeOut  = localTimeOut;
+            }
+            acceptor.start();
+        }
+        learner.start();
+        proposer1.prepare(0);
+        proposer2.prepare(0);
+                  
+        if(proposer1.leader == true)
+        {
+            proposer1.propose(0);
+        }
+        if(proposer2.leader == true)
+        {
+            proposer2.propose(0);
+        }
+    }
 }

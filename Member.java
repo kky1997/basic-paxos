@@ -1,8 +1,7 @@
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Vector;
 
 //address book used by acceptors to keep add their ports so proposers know how to contact them
+//proposers will use this AddressBookLookUp vector to get each port for every acceptor.
 class AddressBook 
 {
     volatile public static Vector<Integer> AddressBookLookUp = new Vector<Integer>();
@@ -12,7 +11,7 @@ class AddressBook
     {
     }
 }
-//extends thread, so can create a thread for each member
+//extends thread, so can create a thread for each member, Acceptors and Proposers will extend from this parent class
 public class Member extends Thread
 {
     private String name = "";
@@ -23,7 +22,7 @@ public class Member extends Thread
     private boolean acceptor = false;
     private int response_Time = 0;
 
-
+    //parameterised constructors for member
     public Member(String name, boolean status, boolean desire, boolean proposer, boolean learner, boolean acceptor, int rt)
     {
         this.name = name;
@@ -42,7 +41,7 @@ public class Member extends Thread
             this.response_Time = rt;
         }
     }
-
+    //parameterised constructors for member
     public Member(String name, int rt)
     {
         this.name = name;     
@@ -55,18 +54,20 @@ public class Member extends Thread
             this.response_Time = rt;
         }
     }
-
+    //parameterised constructors for member
     public Member(String name)
     {
         this.name = name;
     }
 
+    //Method to split String name into two parts and retrieve the int component
     public int splitName(String name)
     {
         String[] characters = name.split("(?<=\\D)(?=\\d)");
         return Integer.parseInt(characters[1]);
     }
 
+    //Getters and setters for data members 
     public String get_Name()
     {
         return this.name;

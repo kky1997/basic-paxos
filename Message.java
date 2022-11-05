@@ -1,5 +1,7 @@
 import java.io.*;
+
 //the message object passed from proposer to acceptor to learner
+//since it's passed through Objectstream, it implements the serializable interface
 public class Message implements Serializable
 {
     String name = "";
@@ -9,10 +11,12 @@ public class Message implements Serializable
     String response = "";
     int port = 0;
 
+    //non-parameterised constructor
     public Message()
     {
     }
 
+    //parameterised constructors
     public Message(String response)
     {
         this.response = response;
