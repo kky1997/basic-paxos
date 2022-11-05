@@ -13,11 +13,13 @@ public class ProcessPool
     public static final int DEFAULT_TIME_OUT_CONSTANT_PREPARE_SOCKET = 6000;
 
     //basic 1 proposer immediate response times
-    public void TestCase_1() throws IOException, InterruptedException
+    public void TestCase_1(int round) throws IOException, InterruptedException
     {
         numberOfProposers = 1;
         numberOfAcceptors.set(8);
         NUMBER_OF_ACCEPTORS = 8;
+        Driver.threadCount.set(NUMBER_OF_ACCEPTORS);
+        System.out.println("Round: " + round + "\n");
         Thread learner = new learner("learner", "M1 is president with 5 votes");
         proposer proposer1 = new proposer("M1");
         for(int i = 1; i < NUMBER_OF_ACCEPTORS + 1; i++)
@@ -36,11 +38,13 @@ public class ProcessPool
     }
 
     //basic 2 proposer immediate response times (M1 goes, then M2)
-    public void TestCase_2() throws IOException, InterruptedException
+    public void TestCase_2(int round) throws IOException, InterruptedException
     {
         numberOfProposers = 2;
         numberOfAcceptors.set(7);
         NUMBER_OF_ACCEPTORS = 7;
+        Driver.threadCount.set(NUMBER_OF_ACCEPTORS);
+        System.out.println("Round: " + round + "\n");
         Thread learner = new learner("learner", "M1 is president with 4 votes");
         proposer proposer1 = new proposer("M1");
         proposer proposer2 = new proposer("M2");
@@ -64,11 +68,13 @@ public class ProcessPool
     }
 
     //basic 3 proposer immediate response times (M1 goes, then M3, lastly M2)
-    public void TestCase_3() throws IOException, InterruptedException
+    public void TestCase_3(int round) throws IOException, InterruptedException
     {
         numberOfProposers = 3;
         numberOfAcceptors.set(6);
         NUMBER_OF_ACCEPTORS = 6;
+        Driver.threadCount.set(NUMBER_OF_ACCEPTORS);
+        System.out.println("Round: " + round + "\n");
         Thread learner = new learner("learner", "M1 is president with 4 votes");
         proposer proposer1 = new proposer("M1");
         proposer proposer2 = new proposer("M2");

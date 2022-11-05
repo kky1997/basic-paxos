@@ -19,20 +19,68 @@ public class Driver
             case 1:
             {
                 ProcessPool pp = new ProcessPool();
-                pp.TestCase_1();
+                do
+                {   
+                    while(threadCount.get() !=0){};
+                    pp.TestCase_1(roundCount);
+                    while(learner.isAlive)
+                    {
+                        TimeUnit.SECONDS.sleep(3);
+                    }
+                    learner.isAlive = true;
+                    roundCount++;
+                    ProcessPool.leaderCount.set(0); //reset leadercount so that it doesn't have any previous counts from last round
+                    ProcessPool.numberOfAcceptors.set(8); 
+                    ProcessPool.numberOfProposers = 1;
+                    AddressBook.AddressBookLookUp.clear();
+                    proposer.ID_Modifier++;
+                    proposer.globalAcceptorCounter.set(0); 
+                }while(nextRound);
                 break;
             }
             
             case 2:
             {
                 ProcessPool pp = new ProcessPool();
-                pp.TestCase_2();
+                do
+                {   
+                    while(threadCount.get() !=0){};
+                    pp.TestCase_2(roundCount);
+                    while(learner.isAlive)
+                    {
+                        TimeUnit.SECONDS.sleep(3);
+                    }
+                    learner.isAlive = true;
+                    roundCount++;
+                    ProcessPool.leaderCount.set(0); //reset leadercount so that it doesn't have any previous counts from last round
+                    ProcessPool.numberOfAcceptors.set(7); 
+                    ProcessPool.numberOfProposers = 2;
+                    AddressBook.AddressBookLookUp.clear();
+                    proposer.ID_Modifier++;
+                    proposer.globalAcceptorCounter.set(0); 
+                }while(nextRound);
                 break;
             }
             case 3:
             {
                 ProcessPool pp = new ProcessPool();
-                pp.TestCase_3();
+                do
+                {   
+                    while(threadCount.get() !=0){};
+                    pp.TestCase_3(roundCount);
+                    while(learner.isAlive)
+                    {
+                        TimeUnit.SECONDS.sleep(3);
+                    }
+                    learner.isAlive = true;
+                    roundCount++;
+                    ProcessPool.leaderCount.set(0); //reset leadercount so that it doesn't have any previous counts from last round
+                    ProcessPool.numberOfAcceptors.set(6); 
+                    ProcessPool.numberOfProposers = 3;
+                    AddressBook.AddressBookLookUp.clear();
+                    proposer.ID_Modifier++;
+                    proposer.globalAcceptorCounter.set(0); 
+                }while(nextRound);
                 break;
             }
             case 4:
