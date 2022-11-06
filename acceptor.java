@@ -136,11 +136,10 @@ public class acceptor extends Member
         {
             if(e instanceof ConnectException)
             {
-                
             }
             else
             {
-                e.printStackTrace(); ///!!!!!!!!!!!!!!!!!!!!! WASn"T PRINTING EXCEPTION BEFORE
+                e.printStackTrace();
             }
         }
     }
@@ -182,7 +181,7 @@ public class acceptor extends Member
             acceptorServerSocket.bind(new InetSocketAddress(port));
             
             //SET TIMEOUT so that during the prepare/promise phase, acceptors that aren't contacted (because majority already reached)
-            //will not have their bind addresses in use by the next round
+            //should not have their bind addresses in use by the next round
             acceptorServerSocket.setSoTimeout(8000);
             
             while(ProcessPool.numberOfProposers > proposerCounter) //allow each proposer to connect 
@@ -284,9 +283,10 @@ public class acceptor extends Member
                 }
 
                 //here we generate a random number to see if m2 will reply to this or not, since they have a bad internet connection and don't always reply to all emails
+                //if they are not working at the cafe (ResponseTime of 3 means that are NOT working at cafe).
                 //we check if response time is 3 (they are not working) and also their name is "m2"
                 //if they are working, they respond to everything instantly and reply to every email, so we can skip this.
-                //NOTE that this will only affect members who are ACCEPTORS, hence we check if they are constructed as acceptors
+                //NOTE that this will only affect M2 as ACCEPTOR, hence we check if they are constructed as acceptors
                 else if(this.get_ResponseTime() == 3 && this.get_Name().equalsIgnoreCase("m2") && this.get_Acceptor() == true)
                 {
                     System.out.println("[GENERATING RANDOM NUMBER AND SEEING IF M2 WILL REPLY (DODGY INTERNET)]");

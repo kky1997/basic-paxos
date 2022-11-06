@@ -269,9 +269,7 @@ public class proposer extends Member
                 }
                 else
                 {
-                   
                     failedResponses.add(promise);
-                    
                 }
                 globalAcceptorCounter.getAndIncrement(); //this is used for the acceptor spinlock, only incremented in prepare not propose since propose is after the spinlock in acceptor
             }
@@ -308,7 +306,6 @@ public class proposer extends Member
                 {
                     if(e instanceof NullPointerException)
                     {
-
                     }
                     else
                     {

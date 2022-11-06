@@ -104,7 +104,7 @@ public class ProcessPool
     }
 
     //M3 always in woods, M2 fails for 2 rounds, on 3 round, they don't fail
-    //M2 is never working
+    //M2 is never working and so they have a chance to not reply to Propose mesasges (scripted for first 2 rounds)
     public void Test_Case4(int round) throws IOException
     {
         numberOfProposers = 1;
@@ -161,7 +161,7 @@ public class ProcessPool
     }
 
     //m3 never in woods, M2 acceptor fails for 2 rounds, on 3 round, they don't fail
-    //m2 is also never working
+    //m2 is never working and so they have a chance to not reply to Propose mesasges (scripted for first 2 rounds)
     public void Test_Case5(int round) throws IOException 
     {
         numberOfProposers = 1;
@@ -486,6 +486,70 @@ public class ProcessPool
         if(proposer2.leader == true)
         {
             proposer2.propose(0);
+        }
+    }
+
+    //M1 and M3 as proposers, first 2 rounds M3 will fail after prepare(), on 3rd round M2(acceptor) will fail to reply to Propose
+    //this test should resolve at round 4 onwards.
+    public void Test_Case11(int round) throws IOException
+    {
+        numberOfProposers = 2;
+        numberOfAcceptors.set(7);
+        NUMBER_OF_ACCEPTORS = 7;
+        Driver.threadCount.set(NUMBER_OF_ACCEPTORS);
+        System.out.println("Round: " + round + "\n");
+        int roundCounter = round;
+        Random random = new Random();
+        int randomResponseTime = 0;
+        int localTimeOut = TIME_OUT_CONSTANT + 2500;
+        Thread learner = new learner("learner", "M1 is president with 4 votes");
+        proposer proposer1 = new proposer("M1");
+        proposer proposer3 = new proposer("M3", 2);
+        if(roundCounter < 3)
+        {
+            proposer3.proposeOrNot = 1;
+        }
+        else
+        {
+           proposer3.proposeOrNot = 2;
+        }
+        
+        for(int i = 2; i < NUMBER_OF_ACCEPTORS + 2; i++)
+        {
+            acceptor acceptor = new acceptor("M" + Integer.toString(i + 1));
+            if(acceptor.get_Name().equalsIgnoreCase("M3"))
+            {
+                acceptor.set_Name("M2");
+                acceptor.set_ResponseTime(3);
+                acceptor.proposeSocketTimeOut  = localTimeOut;
+                if(roundCounter == 3)
+                {
+                    acceptor.caseSelectorM2 = 1;
+                }
+                else
+                {
+                    acceptor.caseSelectorM2 = 2;
+                }
+            }
+            else
+            {
+                randomResponseTime = random.nextInt(3)+1;
+                acceptor.set_ResponseTime(randomResponseTime);
+                acceptor.proposeSocketTimeOut  = localTimeOut;
+            }
+            acceptor.start();
+        }
+        learner.start();
+        proposer1.prepare(0);
+        proposer3.prepare(0);
+                  
+        if(proposer1.leader == true)
+        {
+            proposer1.propose(0);
+        }
+        if(proposer3.leader == true)
+        {
+            proposer3.propose(0);
         }
     }
 }

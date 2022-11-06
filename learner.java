@@ -72,7 +72,6 @@ public class learner extends Member
             //while loop ends when thread number = number of threads created
             //so only after all threads have voted
             //inputstream can end and the result of vote can be announced
-            //can spawn threads again like A2 to handle each acceptor connecting
             learnerServerSocket = new ServerSocket(9000);
             learnerServerSocket.setSoTimeout(35000);
             while(acceptorCounter < ProcessPool.numberOfAcceptors.get()) //loop for the number of acceptors that are present in the system
@@ -93,7 +92,6 @@ public class learner extends Member
             if(e instanceof SocketTimeoutException)
             {
                 System.out.println("learner timedout");
-                
             }
             else
             {
@@ -106,7 +104,7 @@ public class learner extends Member
         {
             isAlive = false;
             Driver.nextRound = true;
-            learnerServerSocket.close(); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            learnerServerSocket.close();
         }
        
     }
@@ -140,7 +138,6 @@ public class learner extends Member
         {
             return "vote failed";
         }
-        
     }
 
     // this threaded class is used to create threads to handle every Accepted message from acceptors

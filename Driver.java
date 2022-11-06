@@ -12,6 +12,7 @@ public class Driver
     public static AtomicInteger threadCount = new AtomicInteger(0);
 
     //method to handle switch statement which will run the correct profile based on what selected profile the user makes.
+    //it's fed in an integer that is provided by scanner input from the user
     public static void ProcessInput(int profile) throws ClassNotFoundException, InterruptedException, IOException
     {
         switch(profile)
@@ -210,6 +211,27 @@ public class Driver
                 }while(nextRound);
                 break;
             }
+            case 10:
+            {
+                ProcessPool pp = new ProcessPool();
+                do
+                {
+                    pp.Test_Case11(roundCount);
+                    while(learner.isAlive)
+                    {
+                        TimeUnit.SECONDS.sleep(3);
+                    }
+                    learner.isAlive = true;
+                    roundCount++;
+                    ProcessPool.leaderCount.set(0); //reset leadercount so that it doesn't have any previous counts from last round
+                    ProcessPool.numberOfAcceptors.set(7); 
+                    ProcessPool.numberOfProposers = 2;
+                    AddressBook.AddressBookLookUp.clear();
+                    proposer.ID_Modifier++;
+                    proposer.globalAcceptorCounter.set(0);
+                }while(nextRound);
+                break;
+            }
         }
     }
 
@@ -225,15 +247,17 @@ public class Driver
         System.out.println("2 - Basic paxos with 2 proposers proposing simultaneously and immediate response times (M1 -> M2)");
         System.out.println("3 - basic paxos with 3 proposers proposing simultaneously and immediate response times (M1 -> M3 -> M2)" + "\n");
         System.out.println("[TEST - DELAYED RESPONSE TIMES (M4 - M9 always have random response times)]");
+        System.out.println("(Please note that these tests may take awhile (35s timeout set for Learner which must expire before next round starts) \n");
         System.out.println("4 - 1 proposer and response times based on their councillor profiles (M2 will not reply to propose messages for first two rounds & M3 is always on a retreat in the woods)");
         System.out.println("5 - 1 proposer and response times based on their councillor profiles (M2 will not reply to propose messages for first two rounds & M3 is never on retreat in the woods)");
         System.out.println("6 - 2 propsers and response times based on their councillor profiles (proposer M2 fail after prepare() for 2 rounds)(M1 -> M2)");
         System.out.println("7 - 2 propsers and response times based on their councillor profiles (proposer M2 fail after prepare() for 2 rounds)(M2 -> M1)");
-        System.out.println("8 - 2 proposer and response times based on their councillor profiles (m2 is always at work and replies instantly)");
+        System.out.println("8 - 2 proposer and response times based on their councillor profiles (M2 is always at work and replies instantly)");
         System.out.println("9 - 2 propsers and response times based on their councillor profiles (truly random response times)");
-    
+        System.out.println("10 - 2 proposers and response times based on their councillor profiles (M1 and M3 are proposers, proposer M3 fail after prepare() for 2 rounds, M2 will not reply to propose message at round 3)(M1 -> M3)");
+        
         int profile = 0;
-        profile = Integer.parseInt(input.nextLine());
+        profile = Integer.parseInt(input.nextLine()); // profile variable will be whatever is passed in by user through scanner
         ProcessInput(profile);
         input.close();
     }    
